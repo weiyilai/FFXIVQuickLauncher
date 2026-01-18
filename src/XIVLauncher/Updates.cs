@@ -29,15 +29,15 @@ namespace XIVLauncher
         public event Action<bool>? OnUpdateCheckFinished;
 
 #if DEV_SERVER
-        private const string LEASE_META_URL = "http://localhost:5025/Launcher/GetLease";
-        private const string LEASE_FILE_URL = "http://localhost:5025/Launcher/GetFile";
+        private const string LeaseMetaUrl = "http://localhost:5025/Launcher/GetLease";
+        private const string LeaseFileUrl = "http://localhost:5025/Launcher/GetFile";
 #else
-        private const string LEASE_META_URL = "https://kamori.goats.dev/Launcher/GetLease";
-        private const string LEASE_FILE_URL = "https://kamori.goats.dev/Launcher/GetFile";
+        private const string LeaseMetaUrl = "https://kamori.goats.dev/Launcher/GetLease";
+        private const string LeaseFileUrl = "https://kamori.goats.dev/Launcher/GetFile";
 #endif
 
-        private const string TRACK_RELEASE = "Release";
-        private const string TRACK_PRERELEASE = "Prerelease";
+        private const string TrackRelease = "Release";
+        private const string TrackPrerelease = "Prerelease";
 
         public static Lease? UpdateLease { get; private set; }
 
@@ -84,7 +84,7 @@ namespace XIVLauncher
         }
 #pragma warning restore CS8618
 
-        private const string FAKE_URL_PREFIX = "https://example.com/";
+        private const string FakeUrlPrefix = "https://example.com/";
 
         private class FakeSquirrelFileDownloader : IFileDownloader
         {
@@ -100,9 +100,9 @@ namespace XIVLauncher
             public async Task DownloadFile(string url, string targetFile, Action<int> progress, IDictionary<string, string>? headers = null, double timeout = 30, CancellationToken cancelToken = new CancellationToken())
             {
                 Log.Verbose("FakeSquirrel: DownloadFile from {Url} to {Target}", url, targetFile);
-                var fileNeeded = url.Substring(FAKE_URL_PREFIX.Length);
+                var fileNeeded = url.Substring(FakeUrlPrefix.Length);
 
-                using var response = await client.GetAsync($"{LEASE_FILE_URL}/{fileNeeded}", HttpCompletionOption.ResponseHeadersRead, cancelToken).ConfigureAwait(false);
+                using var response = await client.GetAsync($"{LeaseFileUrl}/{fileNeeded}", HttpCompletionOption.ResponseHeadersRead, cancelToken).ConfigureAwait(false);
                 response.EnsureSuccessStatusCode();
                 using var contentStream = await response.Content.ReadAsStreamAsync(cancelToken).ConfigureAwait(false);
 
@@ -116,7 +116,7 @@ namespace XIVLauncher
             public Task<byte[]> DownloadBytes(string url, IDictionary<string, string>? headers = null, double timeout = 30)
             {
                 Log.Verbose("FakeSquirrel: DownloadUrl from {Url}", url);
-                var fileNeeded = url[FAKE_URL_PREFIX.Length..];
+                var fileNeeded = url[FakeUrlPrefix.Length..];
 
                 if (fileNeeded.StartsWith("RELEASES", StringComparison.Ordinal))
                     return Task.FromResult(Encoding.UTF8.GetBytes(lease.ReleasesList));
@@ -130,7 +130,7 @@ namespace XIVLauncher
             public Task<string> DownloadString(string url, IDictionary<string, string>? headers = null, double timeout = 30)
             {
                 Log.Verbose("FakeSquirrel: DownloadUrl from {Url}", url);
-                var fileNeeded = url[FAKE_URL_PREFIX.Length..];
+                var fileNeeded = url[FakeUrlPrefix.Length..];
 
                 if (fileNeeded.StartsWith("RELEASES", StringComparison.Ordinal))
                     return Task.FromResult(lease.ReleasesList);
@@ -165,14 +165,14 @@ namespace XIVLauncher
 
             client.Timeout = TimeSpan.FromMinutes(60);
             client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("XIVLauncher", AppUtil.GetGitHash()));
-            client.DefaultRequestHeaders.AddWithoutValidation("X-XL-Track", prerelease ? TRACK_PRERELEASE : TRACK_RELEASE);
+            client.DefaultRequestHeaders.AddWithoutValidation("X-XL-Track", prerelease ? TrackPrerelease : TrackRelease);
             client.DefaultRequestHeaders.AddWithoutValidation("X-XL-LV", "0");
             client.DefaultRequestHeaders.AddWithoutValidation("X-XL-HaveVersion", AppUtil.GetAssemblyVersion());
             client.DefaultRequestHeaders.AddWithoutValidation("X-XL-HaveAddon", App.Settings.InGameAddonEnabled ? "yes" : "no");
             client.DefaultRequestHeaders.AddWithoutValidation("X-XL-FirstStart", App.Settings.VersionUpgradeLevel == 0 ? "yes" : "no");
             client.DefaultRequestHeaders.AddWithoutValidation("X-XL-HaveWine", EnvironmentSettings.IsWine ? "yes" : "no");
 
-            var response = await client.GetAsync(LEASE_META_URL).ConfigureAwait(false);
+            var response = await client.GetAsync(LeaseMetaUrl).ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
 
             if (response.Headers.TryGetValues("X-XL-Canary", out var values) &&
@@ -187,7 +187,7 @@ namespace XIVLauncher
                 throw new LeaseAcquisitionException(leaseData?.Message ?? "No lease data");
 
             var fakeDownloader = new FakeSquirrelFileDownloader(client, leaseData, prerelease);
-            var source = new SimpleWebSource(FAKE_URL_PREFIX, fakeDownloader);
+            var source = new SimpleWebSource(FakeUrlPrefix, fakeDownloader);
 
             // Velopack bug: Delta updates are not reliable at the moment
             // https://github.com/velopack/velopack/issues/751
@@ -297,10 +297,10 @@ namespace XIVLauncher
                         updateManager.ApplyUpdatesAndRestart(updateInfo);
                     }
                 }
-#if !XL_NOAUTOUPDATE
                 else
+                {
                     OnUpdateCheckFinished?.Invoke(true);
-#endif
+                }
             }
             catch (Exception ex)
             {
@@ -327,5 +327,3 @@ namespace XIVLauncher
         }
     }
 }
-
-#nullable restore

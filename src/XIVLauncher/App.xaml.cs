@@ -91,9 +91,7 @@ namespace XIVLauncher
         public static WindowsSteam Steam;
         public static CommonUniqueIdCache UniqueIdCache;
 
-#if !XL_NOAUTOUPDATE
-        private UpdateLoadingDialog _updateWindow;
-#endif
+        private UpdateLoadingDialog updateWindow;
 
         public static CmdLineOptions CommandLine { get; private set; }
 
@@ -188,9 +186,7 @@ namespace XIVLauncher
             {
                 this.useFullExceptionHandler = true;
 
-#if !XL_NOAUTOUPDATE
-                this._updateWindow?.Hide();
-#endif
+                this.updateWindow?.Hide();
 
                 if (!finishUp)
                     return;
@@ -419,15 +415,14 @@ namespace XIVLauncher
                 Log.Error(ex, "Could not set up Steam");
             }
 
-#if !XL_NOAUTOUPDATE
-            if (!EnvironmentSettings.IsDisableUpdates)
+            if (!AppUtil.IsDisableUpdates)
             {
                 try
                 {
                     Log.Information("Starting update check...");
 
-                    _updateWindow = new UpdateLoadingDialog();
-                    _updateWindow.Show();
+                    this.updateWindow = new UpdateLoadingDialog();
+                    this.updateWindow.Show();
 
                     var updateMgr = new Updates();
                     updateMgr.OnUpdateCheckFinished += OnUpdateCheckFinished;
@@ -452,20 +447,13 @@ namespace XIVLauncher
                         "XIVLauncher could not check for updates. Please check your internet connection or try again.\n\n" + ex,
                         "XIVLauncher Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     Environment.Exit(0);
-                    return;
                 }
             }
-#endif
-
-            if (AppUtil.IsDisableUpdates)
+            else
             {
+                // Skip updates immediately
                 OnUpdateCheckFinished(true);
-                return;
             }
-
-#if XL_NOAUTOUPDATE
-            OnUpdateCheckFinished(true);
-#endif
         }
     }
 }

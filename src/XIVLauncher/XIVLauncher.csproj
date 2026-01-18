@@ -25,14 +25,6 @@
     <ApplicationIcon>Resources\dalamud_icon.ico</ApplicationIcon>
   </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-    <DefineConstants>TRACE;DEBUG;XL_NOAUTOUPDATE</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(Configuration)' == 'ReleaseNoUpdate' ">
-    <DefineConstants>TRACE;XL_NOAUTOUPDATE</DefineConstants>
-  </PropertyGroup>
-
   <ItemGroup>
     <Resource Remove="Resources\aria2c-xl.exe" />
     <Resource Remove="Resources\CHANGELOG.txt" />

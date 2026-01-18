@@ -87,15 +87,9 @@ namespace XIVLauncher.Windows
                 }
             };
 
-#if !XL_NOAUTOUPDATE
-            Title += " v" + AppUtil.GetAssemblyVersion();
-#else
             Title += " " + AppUtil.GetGitHash();
-#endif
 
-#if !XL_NOAUTOUPDATE
-            if (EnvironmentSettings.IsDisableUpdates)
-#endif
+            if (AppUtil.IsDisableUpdates)
             {
                 Title += " - NO UPDATES";
             }
