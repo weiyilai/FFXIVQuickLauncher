@@ -273,8 +273,8 @@
                             </StackPanel>
 
                             <CheckBox x:Name="BackupIncludeGameSettingsCheckBox" Margin="0,20,0,0" HorizontalAlignment="Center"
-                                      Foreground="{DynamicResource MaterialDesignBody}"
-                                      Content="Also include game settings and character files" ToolTip="Include game settings and character files in the backup."/>
+                                      Foreground="{DynamicResource MaterialDesignBody}" IsChecked="True"
+                                      Content="Include game settings and character files in backup" ToolTip="Include game settings and character files in the backup."/>
                         </StackPanel>
                     </Grid>
                 </Grid>
